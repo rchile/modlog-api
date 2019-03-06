@@ -1,9 +1,11 @@
 from flask import Flask, jsonify, redirect
+from flask_cors import CORS
 from common import *
 
 reddit = get_reddit_instance()
 sub = reddit.subreddit('chile')
 app = Flask(__name__)
+CORS(app)
 
 
 @app.route('/')
