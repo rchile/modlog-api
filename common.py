@@ -3,8 +3,6 @@ import re
 import praw
 from praw.models import ModAction
 
-import settings
-
 pat_modentry = re.compile(r'^(ModAction_)?[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$')
 
 
@@ -14,12 +12,20 @@ def get_reddit_instance():
     If variables are not set, then the RuntimeError exception is raised.
     :return: A ``praw.Reddit`` instance.
     """
+
     params = {
-        'client_id': settings.CLIENT_ID or os.environ.get('CLIENT_ID', ''),
-        'client_secret': settings.CLIENT_SECRET or os.environ.get('CLIENT_SECRET', ''),
-        'refresh_token': settings.REFRESH_TOKEN or os.environ.get('REFRESH_TOKEN', ''),
-        'user_agent': 'rchilemodlog/0.1.0'
+        'client_id': os.environ.get('CLIENT_ID', ''),
+        'client_secret': os.environ.get('CLIENT_SECRET', ''),
+        'refresh_token': os.environ.get('REFRESH_TOKEN', '')
     }
+
+    try:
+        import settings
+        params['client_id'] = settings.CLIENT_ID or params['client_id']
+        params['client_secret'] = settings.CLIENT_SECRET or params['client_secret']
+        params['refresh_token'] = settings.REFRESH_TOKEN or params['refresh_token']
+    except ModuleNotFoundError:
+        pass
 
     if not params['client_id'] or not params['client_secret'] or not params['refresh_token']:
         raise RuntimeError('Configuration vars not set')
