@@ -16,7 +16,8 @@ def get_reddit_instance():
     params = {
         'client_id': os.environ.get('CLIENT_ID', ''),
         'client_secret': os.environ.get('CLIENT_SECRET', ''),
-        'refresh_token': os.environ.get('REFRESH_TOKEN', '')
+        'refresh_token': os.environ.get('REFRESH_TOKEN', ''),
+        'user_agent': 'rchilemodlog/0.1.0'
     }
 
     try:
