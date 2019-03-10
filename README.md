@@ -66,6 +66,11 @@ To locally run this project, you need to have Python 3.5+ and pip.
 * Copy the `settings.example.py` file to `settings.py` and fill the parameters.
 * Run the `app.py` file.
 
+### TO-DO (future work)
+
+* Caching entries (database usage; note that entries doesn't change in time)
+* Mod login and session support to add notes to entries
+
 ### License
 
 This software is licensed under the [MIT license](LICENSE.txt).
