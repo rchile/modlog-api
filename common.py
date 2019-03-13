@@ -6,6 +6,26 @@ from praw.models import ModAction
 pat_modentry = re.compile(r'^(ModAction_)?[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$')
 
 
+def get_config(name, default=None):
+    """
+    Attempts to retrieve a value from the settings module. If not, tries to get
+    the value as a environment variable. If also is not found there, the default
+    value is returned.
+    :param name: The configuration value.
+    :param default: The default value.
+    :return: The requested configuration value, or the default value if the configuration was not found.
+    """
+
+    value = os.environ.get(name, default)
+    try:
+        import settings
+        value = getattr(settings, name, default) or default
+    except ModuleNotFoundError:
+        pass
+
+    return value
+
+
 def get_reddit_instance():
     """
     Creates a ``praw.Reddit`` instance with parameters from settings or environment variables.
@@ -14,19 +34,11 @@ def get_reddit_instance():
     """
 
     params = {
-        'client_id': os.environ.get('CLIENT_ID', ''),
-        'client_secret': os.environ.get('CLIENT_SECRET', ''),
-        'refresh_token': os.environ.get('REFRESH_TOKEN', ''),
+        'client_id': get_config('CLIENT_ID', ''),
+        'client_secret': get_config('CLIENT_SECRET', ''),
+        'refresh_token': get_config('REFRESH_TOKEN', ''),
         'user_agent': 'rchilemodlog/0.1.0'
     }
-
-    try:
-        import settings
-        params['client_id'] = settings.CLIENT_ID or params['client_id']
-        params['client_secret'] = settings.CLIENT_SECRET or params['client_secret']
-        params['refresh_token'] = settings.REFRESH_TOKEN or params['refresh_token']
-    except ModuleNotFoundError:
-        pass
 
     if not params['client_id'] or not params['client_secret'] or not params['refresh_token']:
         raise RuntimeError('Configuration vars not set')
@@ -44,6 +56,16 @@ def serialize(item: ModAction):
     del d['_reddit']
     d['mod'] = d.pop('_mod')
     return d
+
+
+def valid_entry_id(value):
+    if value is not None:
+        if not pat_modentry.match(value):
+            raise InvalidUsage('Invalid entry id')
+        if not value.startswith('ModAction_'):
+            value = 'ModAction_' + value
+
+    return value
 
 
 class InvalidUsage(Exception):
