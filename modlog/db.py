@@ -1,6 +1,6 @@
 import pymongo
 from pymongo import MongoClient
-from common import get_config
+from modlog.common import get_config
 
 
 class DB:

@@ -1,6 +1,6 @@
-from common import valid_entry_id
-from db import DB
-import api
+from modlog.common import valid_entry_id
+from modlog.db import DB
+from modlog import api
 
 LIMIT = 100
 db = DB()
@@ -19,7 +19,7 @@ def get_entries(after=None):
 
     if len(entries) < LIMIT:
         after = None if len(entries) == 0 else entries[-1]['id']
-        more_entries = api.get_entries(after=after, limit=LIMIT-len(entries))
+        more_entries = api.get_entries(after=after, limit=LIMIT - len(entries))
         db.insert_entries(more_entries)
         for entry in more_entries:
             if '_id' in entry:

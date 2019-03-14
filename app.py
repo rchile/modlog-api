@@ -1,8 +1,8 @@
 from flask import Flask, jsonify, redirect
 from flask_cors import CORS
 
-from common import InvalidUsage
-from data import *
+from modlog.common import InvalidUsage
+from modlog import data
 
 app = Flask(__name__)
 CORS(app)
@@ -16,13 +16,13 @@ def index():
 @app.route('/entries', defaults={'after': None})
 @app.route('/entries/after/<after>')
 def modlog_entries(after):
-    modactions = get_entries(after)
+    modactions = data.get_entries(after)
     return jsonify(modactions)
 
 
 @app.route('/entry/<entry_id>')
 def modlog_entry(entry_id):
-    entry = get_entry(entry_id)
+    entry = data.get_entry(entry_id)
     if entry is None:
         raise InvalidUsage('Entry not found', 404)
 

@@ -1,4 +1,4 @@
-from common import valid_entry_id, serialize, get_reddit_instance, get_config
+from modlog.common import valid_entry_id, serialize, get_reddit_instance, get_config
 
 reddit = get_reddit_instance()
 api = reddit.subreddit(get_config('SUBREDDIT', 'chile'))
