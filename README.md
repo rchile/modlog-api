@@ -68,7 +68,7 @@ To locally run this project, you need to have Python 3.5+ and pip.
 
 ### TO-DO (future work)
 
-* Caching entries (database usage; note that entries doesn't change in time)
+* ~~Caching entries (database usage; note that entries doesn't change in time)~~
 * Mod login and session support to add notes to entries
 * Support for other reddit API parameters
 
