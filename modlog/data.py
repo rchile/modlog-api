@@ -12,13 +12,18 @@ def get_entries(after=None):
         return api.get_entries(after=after)
 
     since = get_entry(after) if after else api.get_first_entry()
-    if after:
-        entries = list(db.get_entries(after=since['created_utc'], limit=LIMIT))
-    else:
-        entries = list(db.get_entries_since(since['created_utc'], limit=LIMIT))
+    entries = []
+
+    if db.get_entry(since['id']):
+        if after:
+            entries = list(db.get_entries(after=since['created_utc'], limit=LIMIT))
+        else:
+            entries = list(db.get_entries_since(since['created_utc'], limit=LIMIT))
 
     if len(entries) < LIMIT:
-        after = None if len(entries) == 0 else entries[-1]['id']
+        if len(entries) > 0:
+            after = entries[-1]['id']
+
         more_entries = api.get_entries(after=after, limit=LIMIT - len(entries))
         db.insert_entries(more_entries)
         for entry in more_entries:
