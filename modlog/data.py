@@ -15,15 +15,11 @@ def get_entries(after=None):
     entries = []
 
     if db.get_entry(since['id']):
-        if after:
-            entries = list(db.get_entries(after=since['created_utc'], limit=LIMIT))
-        else:
-            entries = list(db.get_entries_since(since['created_utc'], limit=LIMIT))
-
-    if len(entries) < LIMIT:
+        entries = list(db.get_entries(after=since['created_utc'], limit=LIMIT, include=(not after)))
         if len(entries) > 0:
             after = entries[-1]['id']
 
+    if len(entries) < LIMIT:
         more_entries = api.get_entries(after=after, limit=LIMIT - len(entries))
         db.insert_entries(more_entries)
         for entry in more_entries:

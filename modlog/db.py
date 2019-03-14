@@ -27,19 +27,12 @@ class DB:
         self._col.create_index('id', unique=True)
         self._col.create_index([('created_utc', pymongo.DESCENDING)])
 
-    def get_entries(self, after=None, limit=100):
+    def get_entries(self, after=None, limit=100, include=False):
         if not self.ready:
             return []
 
-        query_filter = {'created_utc': {'$lt': after}} if after else None
-        return self._col.find(query_filter, limit=limit, sort=[("created_utc", pymongo.DESCENDING)],
-                              projection={'_id': 0})
-
-    def get_entries_since(self, since=None, limit=100):
-        if not self.ready:
-            return []
-
-        query_filter = {'created_utc': {'$lte': since}} if since else None
+        operator = '$lte' if include else '$lt'
+        query_filter = {'created_utc': {operator: after}} if after else None
         return self._col.find(query_filter, limit=limit, sort=[("created_utc", pymongo.DESCENDING)],
                               projection={'_id': 0})
 
