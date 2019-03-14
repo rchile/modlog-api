@@ -59,6 +59,15 @@ def serialize(item: ModAction):
 
 
 def valid_entry_id(value):
+    """
+    Validates and normalizes an entry ID in the format [ModAction_]<UUID>
+    (abcdef01-cdef-0123-4567-0123456789ab), where the first part is optional,
+    but is added if it's not found.
+
+    :param value: The value to check and normalize.
+    :return: The normalized value.
+    :raises InvalidUsage if the entry id does not meet the required format.
+    """
     if value is not None:
         if not pat_modentry.match(value):
             raise InvalidUsage('Invalid entry id')

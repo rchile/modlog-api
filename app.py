@@ -5,7 +5,7 @@ from modlog.common import InvalidUsage
 from modlog import data
 
 app = Flask(__name__)
-CORS(app)
+CORS(app)  # Enable CORS for this app
 
 
 @app.route('/')
