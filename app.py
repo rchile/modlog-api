@@ -1,7 +1,7 @@
 from flask import Flask, jsonify, redirect
 from flask_cors import CORS
 
-from modlog.common import InvalidUsage
+from modlog.common import InvalidUsage, get_reddit_instance, random_string
 from modlog import data
 
 app = Flask(__name__)
@@ -11,6 +11,12 @@ CORS(app)  # Enable CORS for this app
 @app.route('/')
 def index():
     return redirect('https://reddit.com/r/chile')
+
+
+@app.route('/login')
+def login():
+    r = get_reddit_instance(app=True)
+    return redirect(r.auth.url(['identity'], random_string()))
 
 
 @app.route('/entries', defaults={'after': None})
