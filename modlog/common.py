@@ -77,6 +77,22 @@ def valid_entry_id(value):
     return value
 
 
+def filter_entry(entry):
+    """
+    Filters data out from a hidden entry
+    :param entry: The entry to remove it's public data
+    :return: The filtered entry
+    """
+
+    if 'hidden' in entry and entry['hidden']:
+        clear_attrs = 'target_author,target_permalink,target_body,target_title,' \
+                      'target_fullname,description,details'.split(',')
+        for x in clear_attrs:
+            entry[x] = None
+
+    return entry
+
+
 class InvalidUsage(Exception):
     status_code = 400
 

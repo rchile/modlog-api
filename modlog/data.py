@@ -1,4 +1,4 @@
-from modlog.common import valid_entry_id
+from modlog.common import valid_entry_id, filter_entry
 from modlog.db import DB
 from modlog import api
 
@@ -48,7 +48,7 @@ def get_entries(after=None, limit=100):
                 del entry['_id']
         entries += more_entries
 
-    return entries
+    return [filter_entry(x) for x in entries]
 
 
 def get_entry(entry_id):
@@ -64,6 +64,6 @@ def get_entry(entry_id):
     # Try to fetch the entry from the db and return it if it was found
     entry = db.get_entry(entry_id)
     if entry is not None:
-        return entry
+        return filter_entry(entry)
 
     return api.get_entry(entry_id)
