@@ -1,7 +1,12 @@
 import os
 import random
 import re
+from functools import wraps
+
+import praw
+from flask import session, abort
 from praw.models import ModAction
+from prawcore import OAuthException
 
 pat_modentry = re.compile(r'^(ModAction_)?[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$')
 pat_oauth_code = re.compile(r'^[a-zA-Z0-9\-_]{27}$')
@@ -81,6 +86,81 @@ def filter_entry(entry):
             entry[x] = None
 
     return entry
+
+
+def get_reddit_instance(app=False, refresh=None):
+    """
+    Creates a ``praw.Reddit`` instance with parameters from settings or environment variables.
+    If variables are not set, then the RuntimeError exception is raised.
+    :param app: Return an instance based on an app or a user profile.
+    :param refresh: A refresh token in case if it's needed (e.g., to verify a session)
+    :return: A ``praw.Reddit`` instance.
+    """
+
+    if app:
+        params = {
+            'client_id': get_config('APP_ID', ''),
+            'client_secret': get_config('APP_SECRET', ''),
+            'redirect_uri': get_config('APP_RETURN', 'http://localhost:8080/return'),
+            'user_agent': 'rchilemodlog/0.1.0'
+        }
+
+        if not params['client_id'] or not params['client_secret'] or not params['redirect_uri']:
+            raise RuntimeError('Configuration vars not set')
+    else:
+        params = {
+            'client_id': get_config('CLIENT_ID', ''),
+            'client_secret': get_config('CLIENT_SECRET', ''),
+            'refresh_token': get_config('REFRESH_TOKEN', ''),
+            'user_agent': 'rchilemodlog/0.1.0'
+        }
+
+        if not params['client_id'] or not params['client_secret'] or not params['refresh_token']:
+            raise RuntimeError('Configuration vars not set')
+
+    if refresh:
+        params['refresh_token'] = refresh
+
+    return praw.Reddit(**params)
+
+
+def user_is_allowed(reddit):
+    user_name = reddit.user.me().name
+    mods = reddit.subreddit(get_config('SUBREDDIT', 'chile')).moderator()
+    mod = next(x for x in mods if user_name == x.name and 'all' in x.mod_permissions)
+
+    return mod is not None
+
+
+def get_authed_instance(_session):
+    session_refresh = _session.get('refresh_token', '')
+    if session_refresh == '':
+        return None
+
+    try:
+        reddit = get_reddit_instance(app=True, refresh=session_refresh)
+        if not user_is_allowed(reddit):
+            del _session['refresh_token']
+            return None
+        else:
+            return reddit
+    except OAuthException:
+        return None
+
+
+def require_session():
+    def decorator(f):
+        @wraps(f)
+        def wrapped(*args, **kwargs):
+            reddit = get_authed_instance(session)
+            if reddit is None:
+                return abort(403)
+
+            kwargs['reddit'] = reddit
+            return f(*args, **kwargs)
+
+        return wrapped
+    return decorator
 
 
 class InvalidUsage(Exception):

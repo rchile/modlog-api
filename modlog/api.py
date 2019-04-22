@@ -1,39 +1,4 @@
-import praw
-
-from modlog.common import valid_entry_id, serialize, get_config
-
-
-def get_reddit_instance(app=False):
-    """
-    Creates a ``praw.Reddit`` instance with parameters from settings or environment variables.
-    If variables are not set, then the RuntimeError exception is raised.
-    :param app: Return an instance based on an app or a user profile.
-    :return: A ``praw.Reddit`` instance.
-    """
-
-    if app:
-        params = {
-            'client_id': get_config('APP_ID', ''),
-            'client_secret': get_config('APP_SECRET', ''),
-            'redirect_uri': get_config('APP_REDIRECT', 'http://localhost:8080/return'),
-            'user_agent': 'rchilemodlog/0.1.0'
-        }
-
-        if not params['client_id'] or not params['client_secret'] or not params['redirect_uri']:
-            raise RuntimeError('Configuration vars not set')
-    else:
-        params = {
-            'client_id': get_config('CLIENT_ID', ''),
-            'client_secret': get_config('CLIENT_SECRET', ''),
-            'refresh_token': get_config('REFRESH_TOKEN', ''),
-            'user_agent': 'rchilemodlog/0.1.0'
-        }
-
-        if not params['client_id'] or not params['client_secret'] or not params['refresh_token']:
-            raise RuntimeError('Configuration vars not set')
-
-    return praw.Reddit(**params)
-
+from modlog.common import valid_entry_id, serialize, get_config, get_reddit_instance
 
 reddit = get_reddit_instance()
 api = reddit.subreddit(get_config('SUBREDDIT', 'chile'))

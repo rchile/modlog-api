@@ -1,8 +1,9 @@
 from flask import Flask, jsonify, redirect, request, session, abort
 from flask_cors import CORS
 
-from modlog.api import get_reddit_instance, api
-from modlog.common import InvalidUsage, random_string, pat_oauth_code, pat_oauth_state, get_config
+from modlog.api import get_reddit_instance
+from modlog.common import InvalidUsage, random_string, pat_oauth_code, pat_oauth_state, get_config, require_session, \
+    get_authed_instance, user_is_allowed
 from modlog import data
 
 app = Flask(__name__)
@@ -17,9 +18,12 @@ def index():
 
 @app.route('/login')
 def login():
+    if get_authed_instance(session) is not None:
+        return redirect(get_config('APP_REDIRECT', 'http://127.0.0.1:8000/'))
+
     reddit = get_reddit_instance(app=True)
     session['state'] = random_string()
-    return redirect(reddit.auth.url(['identity'], session['state']))
+    return redirect(reddit.auth.url(['identity', 'read'], session['state']))
 
 
 @app.route('/return')
@@ -27,6 +31,7 @@ def login_return():
     reddit = get_reddit_instance(app=True)
     code = request.args.get('code', '')
     state = request.args.get('state', '')
+
     if not pat_oauth_code.match(code) or not pat_oauth_state.match(state):
         print(pat_oauth_code.match(code), pat_oauth_state.match(state))
         return abort(400)
@@ -34,13 +39,33 @@ def login_return():
     if state != session.get('state', ''):
         return abort(401)
 
-    if reddit.auth.authorize(code) is None:
+    refresh = reddit.auth.authorize(code)
+    if refresh is None or not user_is_allowed(reddit):
         return abort(403)
 
-    mods = reddit.subreddit(get_config('SUBREDDIT', 'chile')).moderator()
-    print(mods)
+    session['refresh_token'] = refresh
+    return redirect(get_config('APP_REDIRECT', 'http://127.0.0.1:8000/'))
 
-    return reddit.user.me().name
+
+@app.route('/logout')
+def logout():
+    del session['refresh_token']
+    return redirect(get_config('APP_REDIRECT', 'http://127.0.0.1:8000/'))
+
+
+@app.route('/session_test')
+@require_session()
+def session_test(reddit):
+    return jsonify({'logged': True, 'username': reddit.user.me().name})
+
+
+@app.route('/session')
+def session_info():
+    reddit = get_authed_instance(session)
+    if reddit is None:
+        return jsonify({'logged': False})
+
+    return jsonify({'logged': True, 'username': reddit.user.me().name})
 
 
 @app.route('/entries', defaults={'after': None})

@@ -8,7 +8,8 @@ REFRESH_TOKEN = ''
 
 APP_ID = ''
 APP_SECRET = ''
-APP_REDIRECT = 'http://127.0.0.1:5000/return'
+APP_RETURN = 'http://127.0.0.1:5000/return'
+APP_REDIRECT = 'http://127.0.0.1:8000/'
 
 # Database URI value
 MONGODB_URI = ''
