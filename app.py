@@ -5,6 +5,7 @@ from modlog.api import get_reddit_instance
 from modlog.common import InvalidUsage, random_string, pat_oauth_code, pat_oauth_state, get_config, require_session, \
     get_authed_instance, user_is_allowed
 from modlog import data
+from modlog.data import db
 
 app = Flask(__name__)
 CORS(app, supports_credentials=True)  # Enable CORS for this app
@@ -82,6 +83,23 @@ def modlog_entry(entry_id):
         raise InvalidUsage('Entry not found', 404)
 
     return jsonify(entry)
+
+
+@app.route('/entry/<entry_id>/note/', methods=['POST'])
+@require_session()
+def modlog_set_note(entry_id):
+    entry = data.get_entry(entry_id)
+    if entry is None:
+        raise InvalidUsage('Entry not found', 404)
+
+    if 'notes' not in request.values:
+        raise InvalidUsage('Note text not sent')
+
+    if len(request.values['notes'] > 1000):
+        raise InvalidUsage('Note text too long')
+
+    db.set_entry_note(entry.id, request.values['notes'])
+    return jsonify({'success': True})
 
 
 @app.errorhandler(InvalidUsage)

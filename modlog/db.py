@@ -68,6 +68,12 @@ class DB:
         entry = self._col.find_one({'id': entry_id}, projection={'_id': 0})
         return entry
 
+    def set_entry_note(self, entry_id, note):
+        if not self.get_entry(entry_id):
+            return False
+
+        self._col.update_one({'id': entry_id}, {'$set': {'notes': note}})
+
     def insert_entry(self, entry):
         """
         Insert a single entry to the database. If the entry already exists, then it's updated.
