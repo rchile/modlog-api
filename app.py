@@ -85,20 +85,26 @@ def modlog_entry(entry_id):
     return jsonify(entry)
 
 
-@app.route('/entry/<entry_id>/note/', methods=['POST'])
+@app.route('/entry_notes/', methods=['POST'])
 @require_session()
-def modlog_set_note(entry_id):
+def modlog_set_note(reddit):
+    form = request.json
+    if 'entry_id' not in form:
+        raise InvalidUsage('entry_id text not sent')
+
+    entry_id = form['entry_id']
     entry = data.get_entry(entry_id)
+
     if entry is None:
         raise InvalidUsage('Entry not found', 404)
 
-    if 'notes' not in request.values:
+    if 'notes' not in form:
         raise InvalidUsage('Note text not sent')
 
-    if len(request.values['notes'] > 1000):
+    if len(form['notes']) > 1000:
         raise InvalidUsage('Note text too long')
 
-    db.set_entry_note(entry.id, request.values['notes'])
+    db.set_entry_note(entry_id, form['notes'])
     return jsonify({'success': True})
 
 
