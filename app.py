@@ -7,7 +7,7 @@ from modlog.common import InvalidUsage, random_string, pat_oauth_code, pat_oauth
 from modlog import data
 
 app = Flask(__name__)
-CORS(app)  # Enable CORS for this app
+CORS(app, supports_credentials=True)  # Enable CORS for this app
 app.config['SECRET_KEY'] = get_config('SESSION_SECRET')
 
 
