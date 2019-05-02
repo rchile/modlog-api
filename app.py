@@ -108,6 +108,34 @@ def modlog_set_note(reddit):
     return jsonify({'success': True})
 
 
+@app.route('/hide_entry/', methods=['POST'])
+@require_session()
+def hide_entry(reddit):
+    form = request.json
+    if 'entry_id' not in form:
+        raise InvalidUsage('entry_id text not sent')
+    if 'is_hidden' not in form:
+        raise InvalidUsage('is_hidden value not sent')
+
+    entry_id = form['entry_id']
+    entry = data.get_entry(entry_id)
+
+    if entry is None:
+        raise InvalidUsage('Entry not found', 404)
+
+    print(form)
+    reason = ''
+    if 'reason' in form and bool(form['is_hidden']):
+        reason = form['reason']
+
+    if len(reason) > 1000:
+        raise InvalidUsage('Reason text too long')
+
+    print(entry_id, bool(form['is_hidden']), reason)
+    db.set_entry_hidden(entry_id, bool(form['is_hidden']), reason)
+    return jsonify({'success': True, 'entry': data.get_entry(entry_id)})
+
+
 @app.errorhandler(InvalidUsage)
 def handle_invalid_usage(error):
     response = jsonify(error.to_dict())

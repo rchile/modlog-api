@@ -72,7 +72,14 @@ class DB:
         if not self.get_entry(entry_id):
             return False
 
-        self._col.update_one({'id': entry_id}, {'$set': {'notes': note}})
+        return self._col.update_one({'id': entry_id}, {'$set': {'notes': note}})
+
+    def set_entry_hidden(self, entry_id, is_hidden, reason):
+        if not self.get_entry(entry_id):
+            return False
+
+        print(entry_id, is_hidden, reason)
+        return self._col.update_one({'id': entry_id}, {'$set': {'hidden': is_hidden, 'hidden_reason': reason}})
 
     def insert_entry(self, entry):
         """
