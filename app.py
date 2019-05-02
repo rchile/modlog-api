@@ -123,7 +123,6 @@ def hide_entry(reddit):
     if entry is None:
         raise InvalidUsage('Entry not found', 404)
 
-    print(form)
     reason = ''
     if 'reason' in form and bool(form['is_hidden']):
         reason = form['reason']
@@ -131,7 +130,6 @@ def hide_entry(reddit):
     if len(reason) > 1000:
         raise InvalidUsage('Reason text too long')
 
-    print(entry_id, bool(form['is_hidden']), reason)
     db.set_entry_hidden(entry_id, bool(form['is_hidden']), reason)
     return jsonify({'success': True, 'entry': data.get_entry(entry_id)})
 
