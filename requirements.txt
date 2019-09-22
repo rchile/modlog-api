@@ -1,5 +1,4 @@
-Flask==1.0.2
-gunicorn==19.9.0
-praw==6.1.1
-flask-cors==3.0.7
-pymongo==3.7.2
+Flask>=1.1.1
+praw>=6.4.0
+flask-cors>=3.0.8
+pymongo>=3.9.0

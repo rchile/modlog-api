@@ -1,3 +1,4 @@
+import logging
 import os
 import random
 import re
@@ -161,6 +162,17 @@ def require_session():
 
         return wrapped
     return decorator
+
+
+def get_logger(name):
+    formatter = logging.Formatter('%(asctime)s | %(levelname)-8s | %(name)-8s | %(message)s', '%Y-%m-%d %H:%M:%S')
+    stdout_logger = logging.StreamHandler()
+    stdout_logger.setFormatter(formatter)
+
+    log = logging.getLogger(name)
+    log.setLevel(logging.DEBUG)
+    log.addHandler(stdout_logger)
+    return log
 
 
 class InvalidUsage(Exception):

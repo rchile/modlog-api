@@ -1,15 +1,12 @@
-from flask import Flask, jsonify, redirect, request, session, abort
-from flask_cors import CORS
+from flask import jsonify, redirect, request, session, abort
 
 from modlog.api import get_reddit_instance
 from modlog.common import InvalidUsage, random_string, pat_oauth_code, pat_oauth_state, get_config, require_session, \
     get_authed_instance, user_is_allowed
-from modlog import data
+from modlog import data, create_app
 from modlog.data import db
 
-app = Flask(__name__)
-CORS(app, supports_credentials=True)  # Enable CORS for this app
-app.config['SECRET_KEY'] = get_config('SESSION_SECRET')
+app = create_app()
 
 
 @app.route('/')

@@ -1,6 +1,8 @@
 import pymongo
 from pymongo import MongoClient
-from modlog.common import get_config
+from modlog import get_config, get_logger
+
+log = get_logger('db')
 
 
 class DB:
@@ -16,31 +18,32 @@ class DB:
         # and return stub/empty data.
         db_uri = get_config('MONGODB_URI')
         if not db_uri:
-            print('Database is disabled')
+            log.warning('Database is disabled')
             return
 
         # Initialize database connection
-        print('Connecting to the database...')
+        log.info('Connecting to the database...')
         client = MongoClient(db_uri)
         db = client.get_database()
         self._col = db.get_collection('entries')
         self.ready = True
         col_count = self._col.count()
 
-        print('Connected to the database, name:', db.name)
-        print('DB entry count:', col_count)
+        log.info('Connected to the database, name: %s', db.name)
+        log.info('DB entry count: %d', col_count)
 
         # Create indexes for data retrieval and to avoid dupes.
         self._col.create_index('id', unique=True)
         self._col.create_index([('created_utc', pymongo.DESCENDING)])
 
-    def get_entries(self, after=None, limit=100, include=False):
+    def get_entries(self, after=None, limit=100, include=False, descending=True):
         """
         Retrieves entries from the database
         :param after: Timestamp (created_utc parameter) since when the entries will be retrieved.
         :param limit: The maximum amount of entries to be retrieved.
         :param include: Normally, the matched entry with the `after` parameter would be ignored, but it can be
                         included on the query by setting this to true.
+        :param descending: The sorting of the entries, by date. False for ascending.
         :return: The result of the operation from the database. If the database is not ready,
                  an empty list will be returned.
         """
@@ -52,7 +55,8 @@ class DB:
         query_filter = {'created_utc': {operator: after}} if after else None
 
         # Sort by new->old and remove the mongodb's _id attribute.
-        return self._col.find(query_filter, limit=limit, sort=[("created_utc", pymongo.DESCENDING)],
+        sort = pymongo.DESCENDING if descending else pymongo.ASCENDING
+        return self._col.find(query_filter, limit=limit, sort=[("created_utc", sort)],
                               projection={'_id': 0})
 
     def get_entry(self, entry_id):

@@ -1,6 +1,5 @@
-from modlog.common import valid_entry_id, filter_entry
 from modlog.db import DB
-from modlog import api
+from modlog import api, valid_entry_id, filter_entry
 
 db = DB()
 
