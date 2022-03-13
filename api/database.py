@@ -6,7 +6,7 @@ from .functions import filtered
 if not settings.MONGODB_URL:
     raise RuntimeError('MONGODB_URL is not set')
 
-client = MongoClient(settings.MONGODB_URL)
+client = MongoClient(settings.MONGODB_URL, connect=False)
 
 
 class Modlog:
