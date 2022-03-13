@@ -33,7 +33,7 @@ def entries():
     # Get mod actions after a specific entry (after=<entry_id>)
     after_id = pat_entry_id.match(request.args.get('after', ''))
     if after_id:
-        after_id = 'ModAction_' + mod.groupdict()['entry_id']
+        after_id = 'ModAction_' + after_id.groupdict()['entry_id']
 
     # Fetch entries and return
     limit = try_int(request.args.get('limit', ''), DEFAULT_PAGE_LIMIT)
