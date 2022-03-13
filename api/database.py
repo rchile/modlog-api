@@ -6,10 +6,11 @@ from .functions import filtered
 if not settings.MONGODB_URL:
     raise RuntimeError('MONGODB_URL is not set')
 
+client = MongoClient(settings.MONGODB_URL)
+
 
 class Modlog:
     def __init__(self) -> None:
-        client = MongoClient(settings.MONGODB_URL)
         self.db = client.get_default_database()
         self.c_entries = self.db['entries']
     
