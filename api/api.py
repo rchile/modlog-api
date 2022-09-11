@@ -3,7 +3,7 @@ from flask import request, jsonify, redirect
 from .database import Modlog
 from .constants import pat_entry_id, pat_user, limit_allowed
 from .functions import try_int, response
-from settings import DEFAULT_PAGE_LIMIT
+from settings import DEFAULT_PAGE_LIMIT, HIDDEN_ACTIONS
 
 db = Modlog.get_instance()
 
@@ -29,6 +29,10 @@ def entries():
     mod = pat_user.match(request.args.get('user', ''))
     if mod:
         filters['target_author'] = mod.groupdict()['username']
+    
+    # Hide defined actions
+    if HIDDEN_ACTIONS:
+        filters['action'] = {'$nin': HIDDEN_ACTIONS}
 
     # Get mod actions after a specific entry (after=<entry_id>)
     after_id = pat_entry_id.match(request.args.get('after', ''))
