@@ -23,6 +23,10 @@ class Modlog:
 
         if not filters:
             filters = {}
+        
+        # Hide defined actions
+        if settings.HIDDEN_ACTIONS:
+            filters['action'] = {'$nin': settings.HIDDEN_ACTIONS}
 
         if after_entry:
             filters['created_utc'] = {'$lt': after_entry['created_utc']}
