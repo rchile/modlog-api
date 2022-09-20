@@ -57,3 +57,7 @@ def entry(entry_id=None):
 
 def action_count():
     return db.action_count()
+
+
+def mod_action_count():
+    return db.mod_action_count()

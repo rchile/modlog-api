@@ -42,6 +42,15 @@ class Modlog:
             }
         }}])
         return {i['_id']: i['count'] for i in result}
+    
+    def mod_action_count(self):
+        result = self.c_entries.aggregate([{'$group': {
+            '_id': '$mod',
+            'count': {
+                '$sum': 1
+            }
+        }}])
+        return {i['_id']: i['count'] for i in result}
 
     _instance = None
 
