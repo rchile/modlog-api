@@ -33,6 +33,15 @@ class Modlog:
     
         entries = self.c_entries.find(filters, limit=limit, sort=[('created_utc', DESCENDING)], projection={'_id': 0})
         return filtered(entries)
+    
+    def action_count(self):
+        result = self.c_entries.aggregate([{'$group': {
+            '_id': '$action',
+            'count': {
+                '$sum': 1
+            }
+        }}])
+        return {i['_id']: i['count'] for i in result}
 
     _instance = None
 

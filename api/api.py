@@ -53,3 +53,7 @@ def entry(entry_id=None):
         return response('Entry not found', 404)
 
     return entry
+
+
+def action_count():
+    return db.action_count()
