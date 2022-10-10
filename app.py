@@ -16,4 +16,5 @@ if CORS_ORIGINS:
 if __name__ == '__main__':
     import os
     os.environ['FLASK_ENV'] = 'development'
-    app.run(debug=True)
+    port = int(os.getenv('PORT', 5000))
+    app.run(debug=True, port=port)

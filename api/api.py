@@ -39,8 +39,8 @@ def entries():
     limit = try_int(request.args.get('limit', ''), DEFAULT_PAGE_LIMIT)
     if limit not in limit_allowed:
         limit = DEFAULT_PAGE_LIMIT
-    entries = db.entries(after_id, limit, filters)
-    return jsonify(entries)
+    entries_res = db.entries(after_id, limit, filters)
+    return jsonify(entries_res)
 
 
 def entry(entry_id=None):
@@ -48,11 +48,12 @@ def entry(entry_id=None):
     if not entry_id:
         return response('Invalid entry ID', 400)
 
-    entry = db.entry('ModAction_' + entry_id.groupdict()['entry_id'])
-    if not entry:
+    entry_id = entry_id.groupdict()['entry_id']
+    entry_res = db.entry(f'ModAction_{entry_id}')
+    if not entry_res:
         return response('Entry not found', 404)
 
-    return entry
+    return entry_res
 
 
 def action_count():
